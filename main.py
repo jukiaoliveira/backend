@@ -26,17 +26,16 @@ engine = sqlalchemy.create_engine(
 )
 metadata.create_all(engine)
 
-# Aplicação FastAPI
 app = FastAPI()
 
-# Modelo de dados (entrada e saída)
+# (entrada e saída)
 class Filme(BaseModel):
     id: int
     titulo: str
     diretor: str
     ano: int
 
-# Conectar/desconectar do banco ao iniciar/encerrar
+# Conectar/desconectar 
 @app.on_event("startup")
 async def startup():
     await database.connect()
@@ -45,13 +44,13 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-# Rota GET - Lista todos os filmes
+# GET - Lista todos os filmes
 @app.get("/filmes", response_model=List[Filme])
 async def listar_filmes():
     query = filmes.select()
     return await database.fetch_all(query)
 
-# Rota POST - Cadastrar novo filme
+# POST - Cadastrar novo filme
 @app.post("/filmes", response_model=Filme)
 async def cadastrar_filme(filme: Filme):
     # Verificar se ID já existe
@@ -66,7 +65,7 @@ async def cadastrar_filme(filme: Filme):
     await database.execute(query)
     return filme
 
-# Rota GET - Buscar filme por ID
+# GET - Buscar filme por ID
 @app.get("/filmes/{id}", response_model=Filme)
 async def buscar_filme(id: int):
     query = filmes.select().where(filmes.c.id == id)
@@ -74,3 +73,17 @@ async def buscar_filme(id: int):
     if resultado:
         return resultado
     raise HTTPException(status_code=404, detail="Filme não encontrado.")
+
+# DELETE - Remover filme por ID
+@app.delete("/filmes/{id}")
+async def deletar_filme(id: int):
+    query = filmes.select().where(filmes.c.id == id)
+    resultado = await database.fetch_one(query)
+
+    if not resultado:
+        raise HTTPException(status_code=404, detail="Filme não encontrado.")
+
+    delete_query = filmes.delete().where(filmes.c.id == id)
+    await database.execute(delete_query)
+
+    return {"mensagem": f"Filme com ID {id} foi deletado com sucesso."}
