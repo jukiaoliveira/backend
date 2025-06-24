@@ -28,6 +28,17 @@ metadata.create_all(engine)
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # libera qualquer origem durante desenvolvimento
+    allow_credentials=True,
+    allow_methods=["*"],  # permite todos os métodos (GET, POST, DELETE, etc.)
+    allow_headers=["*"],  # permite todos os headers
+)
+
+
 # (entrada e saída)
 class Filme(BaseModel):
     id: int
