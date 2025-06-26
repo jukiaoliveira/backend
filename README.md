@@ -1,37 +1,92 @@
-![WATTIO](http://wattio.com.br/web/image/1204-212f47c3/Logo%20Wattio.png)
+# 🎬 Desafio WATTIO - CRUD de Filmes
 
-#### Descrição
+Este projeto foi desenvolvido como parte do desafio técnico da WATTIO. O sistema consiste em um CRUD completo de filmes, com upload de imagem e consumo via frontend em React.
 
-O desafio consiste em implementar um CRUD de filmes, utilizando [python](https://www.python.org/ "python") integrando com uma API REST e uma possível persistência de dados.
+## 💡 Sobre o projeto
 
-Rotas da API:
+A aplicação foi dividida em dois repositórios:
 
- - `/filmes` - [GET] deve retornar todos os filmes cadastrados.
- - `/filmes` - [POST] deve cadastrar um novo filme.
- - `/filmes/{id}` -  [GET] deve retornar o filme com ID especificado.
+- 🔧 **Backend (FastAPI)** – este repositório
+- 🎨 **Frontend (React)** – [Repositório do front-end](https://github.com/jukiaoliveira/filmes-react)
 
-O Objetivo é te desafiar e reconhecer seu esforço para aprender e se adaptar. Qualquer código enviado, ficaremos muito felizes e avaliaremos com toda atenção!
+O frontend exibe os filmes em cards com estilo de DVD, usando a paleta preta e amarela. Todos os filmes são cadastrados com imagem, título, diretor e ano.
 
-#### Sugestão de Ferramentas 
-Não é obrigatório utilizar todas as as tecnologias sugeridas, mas será um diferencial =]
+---
 
-- Orientação a objetos (utilizar objetos, classes para manipular os filmes)
-- [FastAPI](https://fastapi.tiangolo.com/) (API com documentação auto gerada)
-- [Docker](https://www.docker.com/) / [Docker-compose](https://docs.docker.com/compose/install/) (Aplicação deverá ficar em um container docker, e o start deverá seer com o comando ``` docker-compose up ```
-- Integração com banco de dados (persistir as informações em json (iniciante) /[SqLite](https://www.sqlite.org/index.html) / [SQLAlchemy](https://fastapi.tiangolo.com/tutorial/sql-databases/#sql-relational-databases) / outros DB)
+## ⚙️ Tecnologias utilizadas
 
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [Uvicorn](https://www.uvicorn.org/)
+- [Pydantic](https://docs.pydantic.dev/)
+- [React](https://react.dev/)
+- [Axios](https://axios-http.com/)
+- [React Toastify](https://fkhadra.github.io/react-toastify/)
+- HTML + CSS (estilização personalizada no front)
 
-#### Como começar?
+---
 
-- Fork do repositório
-- Criar branch com seu nome ``` git checkout -b feature/ana ```
-- Faça os commits de suas alterações ``` git commit -m "[ADD] Funcionalidade" ```
-- Envie a branch para seu repositório ``` git push origin feature/ana ```
-- Navegue até o [Github](https://github.com/), crie seu Pull Request apontando para a branch **```main```**
-- Atualize o README.md descrevendo como subir sua aplicação
+## 📁 Como rodar o projeto
 
-#### Dúvidas?
+### 🔹 Backend (FastAPI)
 
-Qualquer dúvida / sugestão / melhoria / orientação adicional só enviar email para hendrix@wattio.com.br
+> Requisitos: Python 3.11+, pip
 
-Salve!
+1. Clone o repositório:
+```bash
+git clone https://github.com/WATTIO/NOME-DO-REPO-BACKEND
+cd NOME-DO-REPO-BACKEND
+```
+2. Crie um ambiente virtual e ative:
+```bassh
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
+```
+3. Instale as dependências:
+```bash
+pip install -r requirements.txt
+```
+4. Rode o servidor:
+```bash
+uvicorn main:app --reload
+```
+O backend estará disponível em: http://127.0.0.1:8000
+
+### 🔸 Frontend (React)
+
+Requisitos: Node.js + npm
+
+1. Clone o repositório
+```bash
+git clone https://github.com/jukiaoliveira/filmes-react
+cd filmes-react
+```
+2. Instale as dependências:
+```bash
+npm install
+```
+3. Inicie o projeto:
+```bash
+npm start
+```
+O frontend estará em: http://localhost:3000
+
+Obs: Certifique-se de que o backend está rodando em http://127.0.0.1:8000 
+
+## 🎁 Diferenciais
+Frontend com estilo moderno (paleta preta e amarela)
+
+Toasts de feedback ao usuário
+
+Upload real de imagens com pré-visualização
+
+Layout personalizado imitando capas de DVD
+
+Uso completo de React Hooks
+
+💡 Obs: Não utilizei Docker (que era um diferencial), mas foquei em entregar uma interface rica e fluida com React como diferencial visual.
+
+🙋‍♀️ Desenvolvedora
+Júlia Oliveira
+Tecnóloga em Análise e Desenvolvimento de Sistemas
+[LinkedIn](https://www.linkedin.com/in/jurafaoliveira/) | [Portfólio](https://juliaoliveira.netlify.app/)
