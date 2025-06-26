@@ -1,12 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import sqlalchemy
 import databases
+import shutil
+import os
 
-# Banco de dados SQLite
+# Configuração do banco SQLite
 DATABASE_URL = "sqlite:///./filmes.db"
-
 database = databases.Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
 
@@ -18,35 +21,39 @@ filmes = sqlalchemy.Table(
     sqlalchemy.Column("titulo", sqlalchemy.String),
     sqlalchemy.Column("diretor", sqlalchemy.String),
     sqlalchemy.Column("ano", sqlalchemy.Integer),
+    sqlalchemy.Column("imagem", sqlalchemy.String),  # Caminho da imagem
 )
 
-# Conexão com o banco
+# Criação do banco
 engine = sqlalchemy.create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False}
 )
 metadata.create_all(engine)
 
+# App FastAPI
 app = FastAPI()
 
-from fastapi.middleware.cors import CORSMiddleware
-
+# Liberação de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # libera qualquer origem durante desenvolvimento
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # permite todos os métodos (GET, POST, DELETE, etc.)
-    allow_headers=["*"],  # permite todos os headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
+# Servir arquivos estáticos da pasta /static
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# (entrada e saída)
+# Modelos de resposta
 class Filme(BaseModel):
     id: int
     titulo: str
     diretor: str
     ano: int
+    imagem: Optional[str] = None
 
-# Conectar/desconectar 
+# Conexão com o banco
 @app.on_event("startup")
 async def startup():
     await database.connect()
@@ -55,26 +62,11 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-# GET - Lista todos os filmes
+# GET - Listar todos os filmes
 @app.get("/filmes", response_model=List[Filme])
 async def listar_filmes():
     query = filmes.select()
     return await database.fetch_all(query)
-
-# POST - Cadastrar novo filme
-@app.post("/filmes", response_model=Filme)
-async def cadastrar_filme(filme: Filme):
-    # Verificar se ID já existe
-    query_verifica = filmes.select().where(filmes.c.id == filme.id)
-    resultado = await database.fetch_one(query_verifica)
-    if resultado:
-        raise HTTPException(status_code=400, detail="ID já cadastrado.")
-
-    query = filmes.insert().values(
-        id=filme.id, titulo=filme.titulo, diretor=filme.diretor, ano=filme.ano
-    )
-    await database.execute(query)
-    return filme
 
 # GET - Buscar filme por ID
 @app.get("/filmes/{id}", response_model=Filme)
@@ -84,6 +76,48 @@ async def buscar_filme(id: int):
     if resultado:
         return resultado
     raise HTTPException(status_code=404, detail="Filme não encontrado.")
+
+# POST - Cadastrar novo filme com imagem
+@app.post("/filmes", response_model=Filme)
+async def cadastrar_filme(
+    id: int = Form(...),
+    titulo: str = Form(...),
+    diretor: str = Form(...),
+    ano: int = Form(...),
+    imagem: UploadFile = File(...)
+):
+    # Verifica se ID já existe
+    query_verifica = filmes.select().where(filmes.c.id == id)
+    resultado = await database.fetch_one(query_verifica)
+    if resultado:
+        raise HTTPException(status_code=400, detail="ID já cadastrado.")
+
+    # Salvar a imagem
+    pasta = "static"
+    os.makedirs(pasta, exist_ok=True)
+    caminho = os.path.join(pasta, imagem.filename)
+    with open(caminho, "wb") as buffer:
+        shutil.copyfileobj(imagem.file, buffer)
+
+    caminho_relativo = f"/static/{imagem.filename}"
+
+    # Inserir filme no banco
+    query = filmes.insert().values(
+        id=id,
+        titulo=titulo,
+        diretor=diretor,
+        ano=ano,
+        imagem=caminho_relativo
+    )
+    await database.execute(query)
+
+    return {
+        "id": id,
+        "titulo": titulo,
+        "diretor": diretor,
+        "ano": ano,
+        "imagem": caminho_relativo
+    }
 
 # DELETE - Remover filme por ID
 @app.delete("/filmes/{id}")
